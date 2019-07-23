@@ -1,0 +1,29 @@
+Create a GCE instance having Ubuntu 18.10, allowing HTTP traffic, with the following startup script:
+	#! /bin/bash
+	sudo apt-get update
+	sudo apt-get install -y apache2
+	(cat <<EOF > /var/www/html/index.html
+	<html><body><h1>
+	EOF
+	)
+	$USER | cat >> /var/www/html/index.html
+	(cat <<EOF >> /var/www/html/index.html
+	</h1>
+	<p>This page was created from a simple startup script!</p>
+	</body></html>
+	EOF
+	)
+
+CLI commands to stop and restart the instance:
+
+	yashraj@Quantiphi-925:~$ gcloud compute instances stop vm-yr-asses2-3
+	Stopping instance(s) vm-yr-asses2-3...done.
+	Updated [https://www.googleapis.com/compute/v1/projects/pe-training/zones/us-central1-a/instances/vm-yr-asses2-3].
+
+	yashraj@Quantiphi-925:~$ gcloud compute instances start vm-yr-asses2-3
+	Starting instance(s) vm-yr-asses2-3...done.
+	Updated [https://www.googleapis.com/compute/v1/projects/pe-training/zones/us-central1-a/instances/vm-yr-asses2-3].
+
+Apache server running.
+
+On the instance details page for the instance, go to monitoring -> View logs.

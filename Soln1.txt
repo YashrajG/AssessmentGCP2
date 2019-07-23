@@ -1,0 +1,38 @@
+Initialising VPC:
+1. On the VPC main page, click create VPC. Add name, description.
+2. Select subnet creation mode as custom, fill the details for subnet including CIDR as 10.0.0.0/29. Click Create.
+
+5. Create a bastion host for testing:
+	Create another GCE instance in the same subnet with an external IP. Add a network tag as 'bastion-host'
+	Create a firewall rule with source IP range 0.0.0.0/0 and target tags as 'bastion-host'
+
+
+Private Instance:
+6. Create another instance in the same subnet adding 'no-ip' to network tags and setting external IP to none.
+7. In VPC -> Routes, create a new route with:
+	network as created above
+	destination as internet (0.0.0.0/0)
+	Priority 800 (less than the default 1000)
+	tags add 'no-ip'
+	Next hop -> 'Specify an instance'
+	instance as the nat gateway created above
+8. Create a firewall rule with source tags as 'bastion-host' and target tags as 'no-ip'
+
+9. From the bastion host, ssh into the private instance and check if it is connected to the internet:
+	curl example.com
+	It shows Failed error
+
+10. Create NAT Gateway:
+    Go to the Cloud NAT page in the Google Cloud Platform Console.
+    Click Get started or Create NAT gateway.
+    Enter a Gateway name of nat-config.
+    Set the VPC network to custom-network1.
+    Set the Region to us-central1.
+    Under Cloud Router, select Create new router.
+        Enter a Name of nat-router.
+        Click Create.
+    Click Create.
+
+11. From the private instance, again check if it is connected to the internet:
+	curl example.com
+	It shows HTML file.
