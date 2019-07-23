@@ -27,3 +27,6 @@ def hello_pubsub(event, context):
     results = client.list_time_series(project_name,'metric.type = "compute.googleapis.com/instance/cpu/utilization"',interval,monitoring_v3.enums.ListTimeSeriesRequest.TimeSeriesView.FULL,aggregation)
     for result in results:
         print(result)
+
+    # TODO get only CPU utilisation
+    # TODO mail to DevOPS
