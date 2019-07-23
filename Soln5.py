@@ -1,6 +1,7 @@
 import base64
 from google.cloud import monitoring_v3
 import time
+from datetime import datetime
 
 def hello_pubsub(event, context):
     """Triggered from a message on a Cloud Pub/Sub topic.
@@ -26,7 +27,11 @@ def hello_pubsub(event, context):
 
     results = client.list_time_series(project_name,'metric.type = "compute.googleapis.com/instance/cpu/utilization"',interval,monitoring_v3.enums.ListTimeSeriesRequest.TimeSeriesView.FULL,aggregation)
     for result in results:
-        print(result)
-
-    # TODO get only CPU utilisation
+        print(result.metric.labels["instance_name"]) # Instance Name
+        print(result.resource.labels["instance_id"]) # Instance ID
+        for point in result.points:
+            print(datetime.utcfromtimestamp(point.interval.start_time.seconds).strftime('%Y-%m-%d %H:%M:%S')) # Start Time
+            print(datetime.utcfromtimestamp(point.interval.end_time.seconds).strftime('%Y-%m-%d %H:%M:%S')) # End Time
+            print(point.value.double_value) # CPU Utilisation between above time points
+    # TODO put in CSV
     # TODO mail to DevOPS
