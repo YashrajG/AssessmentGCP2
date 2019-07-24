@@ -1,7 +1,8 @@
 import base64
 from google.cloud import monitoring_v3
-import time
 from datetime import datetime
+import time
+import csv
 
 def hello_pubsub(event, context):
     """Triggered from a message on a Cloud Pub/Sub topic.
@@ -25,13 +26,26 @@ def hello_pubsub(event, context):
     aggregation.per_series_aligner = (
         monitoring_v3.enums.Aggregation.Aligner.ALIGN_MEAN)
 
+    csvName = "instancesMetric_" + str(datetime.date.today()) + ".csv"
+    csvRow = []
     results = client.list_time_series(project_name,'metric.type = "compute.googleapis.com/instance/cpu/utilization"',interval,monitoring_v3.enums.ListTimeSeriesRequest.TimeSeriesView.FULL,aggregation)
-    for result in results:
-        print(result.metric.labels["instance_name"]) # Instance Name
-        print(result.resource.labels["instance_id"]) # Instance ID
-        for point in result.points:
-            print(datetime.utcfromtimestamp(point.interval.start_time.seconds).strftime('%Y-%m-%d %H:%M:%S')) # Start Time
-            print(datetime.utcfromtimestamp(point.interval.end_time.seconds).strftime('%Y-%m-%d %H:%M:%S')) # End Time
-            print(point.value.double_value) # CPU Utilisation between above time points
+    with open(csvName, "w") as csvFile:
+        csvWriter = csv.writer(csvFile)
+        for result in results:
+            print(result.metric.labels["instance_name"]) # Instance Name
+            print(result.resource.labels["instance_id"]) # Instance ID
+            csvRow.append(result.metric.labels["instance_name"])
+            csvRow.append(result.resource.labels["instance_id"])
+            for point in result.points:
+                startTime = datetime.utcfromtimestamp(point.interval.start_time.seconds).strftime('%Y-%m-%d %H:%M:%S')
+                endTime = datetime.utcfromtimestamp(point.interval.end_time.seconds).strftime('%Y-%m-%d %H:%M:%S')
+                print(startTime) # Start Time
+                print(endTime) # End Time
+                print(point.value.double_value) # CPU Utilisation between above time points
+                csvRow.append(startTime)
+                csvRow.append(endTime)
+                csvRow.append(point.value.double_value)
+        csvWriter.writerow(csvRow)
+    
     # TODO put in CSV
     # TODO mail to DevOPS
